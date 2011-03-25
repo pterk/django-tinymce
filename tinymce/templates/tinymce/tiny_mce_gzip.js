@@ -126,9 +126,9 @@ var tinyMCE_GZ = {
 	},
 
 	eval : function(co) {
-		var w = window;
-
-		// Evaluate script
+		var w = window, t = this;
+		window.tinyMCEPreInit = {"base": t.baseURL,
+			"suffix": t.settings.suffix};
 		if (!w.execScript) {
 			if (/Gecko/.test(navigator.userAgent))
 				eval(co, w); // Firefox 3.0
@@ -137,4 +137,5 @@ var tinyMCE_GZ = {
 		} else
 			w.execScript(co); // IE
 	}
+
 };
