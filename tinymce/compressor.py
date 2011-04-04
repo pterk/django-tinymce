@@ -11,6 +11,7 @@ from datetime import datetime
 import os
 
 from django.conf import settings
+from django.core import urlresolvers
 from django.core.cache import cache
 from django.http import HttpResponse
 from django.shortcuts import Http404
@@ -112,15 +113,19 @@ def gzip_compressor(request):
 
     # Add filebrowser
     if tinymce.settings.USE_FILEBROWSER:
-        content.append(render_to_string('tinymce/filebrowser.js', {},
-            context_instance=RequestContext(request)).encode("utf-8"))
+        fb_url = "%s://%s%s" % (request.is_secure() and 'https' or 'http',
+                                request.get_host(), urlresolvers.reverse('fb_browse'))
+    
+        content.append(render_to_string('tinymce/filebrowser.js', {'fb_url': fb_url},
+                                        context_instance=RequestContext(request)).encode("utf-8"))
 
     # Restore loading functions
     content.append("tinyMCE_GZ.end();")
 
+    content = ''.join(content)
     # Compress
     if compress:
-        content = compress_string(''.join(content))
+        content = compress_string(content)
         response['Content-Encoding'] = 'gzip'
         response['Content-Length'] = str(len(content))
 
